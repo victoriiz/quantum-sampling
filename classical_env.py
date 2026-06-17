@@ -21,7 +21,6 @@ def evaluate_system_failure(seed_and_samples):
     return failures
 
 if __name__ == "__main__":
-    # 10 Million samples for a quick but robust HPC test
     TOTAL_SAMPLES = 10_000_000
     
     # Check how many CPU cores Slurm allocated to us (default to 4 for local tests)
@@ -48,5 +47,4 @@ if __name__ == "__main__":
     print(f"True Probability : {true_probability:.8e}")
     print("======================================================")
     
-    # Save the output arrays to your high-performance storage space
     np.save("ground_truth_baseline.npy", true_probability)

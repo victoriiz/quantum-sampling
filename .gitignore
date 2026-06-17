@@ -1,0 +1,13 @@
+# Ignore the entire temporary outputs directory
+outputs/
+
+# Catch-all: ignore any stray Slurm log files if generated outside the folder
+*.log
+
+# Ignore raw data binaries
+*.npy
+*.npz
+
+# Ignore standard Python cache structures
+__pycache__/
+*.pyc
