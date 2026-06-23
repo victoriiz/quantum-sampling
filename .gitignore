@@ -11,3 +11,6 @@ outputs/
 # Ignore standard Python cache structures
 __pycache__/
 *.pyc
+
+# ignore virtual environment directories
+qenv/
