@@ -13,8 +13,8 @@ module purge
 module load default
 module load python/3.11.9             
 
-# Activate your localized quantum python environment
-source /work/nvme/bccu/vz8/quantum-sampling/qenv/bin/activate
+# Navigate to your repository script location
+cd /work/nvme/bccu/vz8/quantum-sampling
 
-# Execute the ansatz configuration test
-python quantum_ansatz.py
+# Execute using your safe home-hosted python environment binary
+~/qenv/bin/python quantum_ansatz.py

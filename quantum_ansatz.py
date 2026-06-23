@@ -24,10 +24,16 @@ def variational_circuit(params):
     return qml.probs(wires=range(num_qubits))
 
 if __name__ == "__main__":
+    import os
     np.random.seed(42)
     layers = 3
-    initial_weights = np.random.uniform(0, 2 * pi, (layers, num_qubits))
+    initial_weights = np.random.uniform(0, 2 * np.pi, (layers, num_qubits), requires_grad=True)
 
     probs = variational_circuit(initial_weights)
+
     print(f"Successfully initiated ansatz with {layers} layers and {num_qubits} qubits. There are {initial_weights.size} trainable parameters")
     print(f"Output state space dimension: {len(probs)} distinct quantum amplitudes.")
+
+    os.makedirs("quantum_outputs", exist_ok=True)
+    np.save("quantum_outputs/initial_quantum_probs.npy", np.array(probs))
+    print("Initial quantum probabilities saved to 'quantum_outputs/initial_quantum_probs.npy'")
