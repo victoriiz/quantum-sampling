@@ -10,10 +10,8 @@
 #SBATCH --time=00:05:00             # Time limit (5 minutes max)
 #SBATCH --output=simulation_%j.log  # Log file name matching the Slurm JobID
 
-# Purge default cluster configurations and load python
 module purge
 module load default
 module load python/3.11.9          
 
-# Run your parallel script, passing the allocated CPU count as an argument
 python classical_env.py $SLURM_CPUS_PER_TASK
