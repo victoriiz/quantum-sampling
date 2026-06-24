@@ -1,4 +1,3 @@
-cat << 'EOF' > quantum_optimization.py
 import pennylane as qml
 from pennylane import numpy as np
 import os
@@ -88,6 +87,4 @@ if __name__ == "__main__":
     os.makedirs("figures", exist_ok=True)
     plt.savefig("figures/optimization_loss_plot.png", dpi=300, bbox_inches='tight')
     print("Loss convergence plot saved to 'figures/optimization_loss_plot.png'")
-
-EOF
 
