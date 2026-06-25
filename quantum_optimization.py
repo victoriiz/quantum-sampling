@@ -55,7 +55,7 @@ if __name__ == "__main__":
     opt = qml.AdamOptimizer(stepsize=0.1)
     max_iters = 50
 
-    print(f"Starting optimization with {num_layers} layers and {num_qubits} qubits. There are {weights_0.size} trainable parameters.")
+    print(f"Starting optimization with {num_layers} layers and {num_qubits} qubits. There are {weights.size} trainable parameters.")
     print(f"Target failure probability: {target}")
     print("-"*50)
 
