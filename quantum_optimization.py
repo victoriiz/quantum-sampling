@@ -9,15 +9,23 @@ else:
     target = 0.01420
 
 num_qubits = 10
-dev = qml.device("default.qubit", wires=num_qubits)
+dev = qml.device("lightning.qubit", wires=num_qubits)
+
+NORMAL_LOAD = 1.0
+EXTREME_LOAD = 4.2
+TAU = 65.0
 
 num_states = 2**num_qubits
 failure_mask = np.zeros(num_states)
 for state_idx in range(num_states):
     binary_string = f"{state_idx:0{num_qubits}b}"
-    # TODO: figure out actually plausible failure representation
-    if binary_string.count("1") > 5:
+    phys_loads = [EXTREME_LOAD if bit == '1' else NORMAL_LOAD for bit in binary_string]
+    stress = np.sum(np.array(phys_loads)**2)
+    if stress > TAU:
         failure_mask[state_idx] = 1.0
+
+total_failure_states = int(np.sum(failure_mask))
+print(f"Total number of failure states in the 10-qubit system: {total_failure_states} out of {num_states} possible states.")
 
 @qml.qnode(dev)
 def circuit(params):
@@ -27,7 +35,6 @@ def circuit(params):
     returns: probabilities of all 2^10 possible state configs
     """
     num_layers = params.shape[0]
-
     for layer in range(num_layers):
         for i in range(num_qubits):
             qml.RY(params[layer, i], wires=i)
