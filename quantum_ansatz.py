@@ -1,7 +1,6 @@
 import pennylane as qml
 from pennylane import numpy as np
 
-# define 10-qubit quantum device accelerated by GPU
 num_qubits = 10
 dev = qml.device("default.qubit", wires=num_qubits)
 

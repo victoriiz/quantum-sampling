@@ -9,11 +9,9 @@ def evaluate_system_failure(seed_and_samples):
     seed, num_samples = seed_and_samples
     np.random.seed(seed)
     
-    # 10 independent random load variables
     num_variables = 10
     loads = np.random.exponential(scale=1.0, size=(num_samples, num_variables))
     
-    # System stresses out and fails if cumulative square loads surpass a threshold
     threshold = 65.0
     system_stress = np.sum(loads**2, axis=1)
     failures = np.sum(system_stress > threshold)
@@ -23,17 +21,14 @@ def evaluate_system_failure(seed_and_samples):
 if __name__ == "__main__":
     TOTAL_SAMPLES = 10_000_000
     
-    # Check how many CPU cores Slurm allocated to us (default to 4 for local tests)
     num_cores = int(sys.argv[1]) if len(sys.argv) > 1 else 4
     samples_per_core = TOTAL_SAMPLES // num_cores
     
     print(f"[HPC] Distributing {TOTAL_SAMPLES:,} samples across {num_cores} parallel CPU cores...")
     start_time = time.time()
     
-    # Create distinct tasks for each core
     tasks = [(core_id, samples_per_core) for core_id in range(num_cores)]
     
-    # Run the parallel processing worker pool
     with mp.Pool(processes=num_cores) as pool:
         results = pool.map(evaluate_system_failure, tasks)
         
