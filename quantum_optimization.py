@@ -2,46 +2,29 @@ import pennylane as qml
 from pennylane import numpy as np
 import os
 import matplotlib.pyplot as plt
+import quantum_ansatz as ansatz
 
+TARGET_PROB = 0.01420
 if os.path.exists("outputs/ground_truth_baseline.npy"):
-    target = float(np.load("outputs/ground_truth_baseline.npy"))
-else:
-    target = 0.01420
+    TARGET_PROB = float(np.load("outputs/ground_truth_baseline.npy"))
 
-num_qubits = 10
-dev = qml.device("lightning.qubit", wires=num_qubits)
+NUM_QUBITS = 10
+NUM_LAYERS = 3
+LEARNING_RATE = 0.05
+MAX_STEPS = 150
+SEED = 42
 
-NORMAL_LOAD = 1.0
-EXTREME_LOAD = 4.2
-TAU = 65.0
+dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
+diagonal_elements = ansatz.hamming_failure_mask(NUM_QUBITS, k_crit=5.5)
+failure_operator = qml.Hermitian(np.diag(diagonal_elements), wires=range(NUM_QUBITS))
 
-num_states = 2**num_qubits
-failure_mask = np.zeros(num_states)
-for state_idx in range(num_states):
-    binary_string = f"{state_idx:0{num_qubits}b}"
-    phys_loads = [EXTREME_LOAD if bit == '1' else NORMAL_LOAD for bit in binary_string]
-    stress = np.sum(np.array(phys_loads)**2)
-    if stress > TAU:
-        failure_mask[state_idx] = 1.0
-
-total_failure_states = int(np.sum(failure_mask))
-print(f"Total number of failure states in the 10-qubit system: {total_failure_states} out of {num_states} possible states.")
-
-@qml.qnode(dev)
-def circuit(params):
+@qml.qnode(dev, diff_method="adjoint")
+def execute_qnode(params):
     """
-    Constructs a Variational Quantum Circuit for a 10-qubit system
-    params: matrix of angles (shape: layers x num_qubits)
-    returns: probabilities of all 2^10 possible state configs
+    Binds the ansatz layour to the lightning simulator device with Adjoint tracking enabled.
     """
-    num_layers = params.shape[0]
-    for layer in range(num_layers):
-        for i in range(num_qubits):
-            qml.RY(params[layer, i], wires=i)
-        for i in range(num_qubits - 1):
-            qml.CNOT(wires = [i, i+1])
-    
-    return qml.probs(wires=range(num_qubits))
+    ansatz.variational_circuit(params, NUM_QUBITS, NUM_LAYERS)
+    return qml.expval(failure_operator)
 
 def cost(params):
     """
@@ -49,43 +32,81 @@ def cost(params):
     params: matrix of angles (shape: layers x num_qubits)
     returns: cost value based on the probabilities and failure mask
     """
-    probs = circuit(params)
-    qfailure_weight = np.dot(probs, failure_mask)
-    loss = (qfailure_weight - target) ** 2
+    current_pfail = execute_qnode(params)
+    loss = (current_pfail - TARGET_PROB) ** 2
     return loss
 
 if __name__ == "__main__":
-    np.random.seed(42)
-    num_layers = 3
-    weights = np.random.uniform(0, 2*np.pi, (num_layers, num_qubits), requires_grad=True)
+    print("="*70)
+    print("STARTING VQIS PHASE 3: VARIATIONAL CLASSICAL INVERSION LOOP")
+    print("="*70)
+    print(f"Target Failure Probability Anchor: {TARGET_PROB * 100:.3f}%")
+    print(f"Total System Dimensions/Qubits : {NUM_QUBITS}")
+    print(f"Total Optimization Parameters  : {NUM_LAYERS * NUM_QUBITS} (3 Layers)")
     
-    opt = qml.AdamOptimizer(stepsize=0.1)
-    max_iters = 50
-
-    print(f"Starting optimization with {num_layers} layers and {num_qubits} qubits. There are {weights.size} trainable parameters.")
-    print(f"Target failure probability: {target}")
-    print("-"*50)
-
+    np.random.seed(SEED)
+    initial_params = np.random.uniform(0, 2 * np.pi, NUM_LAYERS * NUM_QUBITS, requires_grad=True)
+    
+    initial_p_fail = execute_qnode(initial_params)
+    print(f"Initial Arbitrary Interference Failure Mass: {initial_p_fail * 100:.2f}% (Expected ~42.1%)")
+    print("-" * 70)
+    
+    opt = qml.AdamOptimizer(stepsize=LEARNING_RATE)
+    
+    params = initial_params
     loss_history = []
-    weight_history = []
-
-    for it in range(max_iters):
-        weights, loss = opt.step_and_cost(cost, weights)
-        loss_history.append(loss)
-        weight_history.append(weights.copy())
-
-        if (it + 1) % 5 == 0 or it == 0:
-            current_probs = circuit(weights)
-            current_weight = float(np.dot(current_probs, failure_mask))
-            print(f"Iteration {it+1:02d} | Loss: {loss:.6f} | Current Failure Weight: {current_weight:.6f}")
+    prob_history = []
     
-    np.save("outputs/optimized_weights.npy", np.array(weights))
+    print(f"{'Step':<6} | {'MSE Loss':<12} | {'Current P_fail (%)':<20} | {'Delta to Target':<12}")
+    print("-" * 70)
+    
+    for step in range(MAX_STEPS):
+        params, loss = opt.step_and_cost(cost, params)
+        
+        current_p_fail = execute_qnode(params)
+        delta = current_p_fail - TARGET_PROB
+        
+        loss_history.append(loss)
+        prob_history.append(current_p_fail)
+        
+        if step % 10 == 0 or step == MAX_STEPS - 1:
+            print(f"{step:<6} | {loss:<12.7f} | {current_p_fail * 100:<19.3f}% | {delta:<+12.5f}")
+            
+        if loss < 1e-8:
+            print(f"\n[INFO] Convergence achieved within tolerance at step {step}!")
+            break
+    
+    np.save("outputs/optimized_vqis_weights.npy", params)
     np.save("outputs/loss_history.npy", np.array(loss_history))
-    np.save("outputs/weight_history.npy", np.array(weight_history))
     print("Optimization complete. Optimized weights and loss history saved to 'outputs/' directory.")
 
-    plt.figure(figsize=(7,4))
-    plt.plot(range(1, max_iters + 1), loss_history, marker='o', color='blue', label='Adam Optimizer Loss')
+    fig, ax1 = plt.subplots(figsize=(10,5))
+
+    color = 'tab:blue'
+    ax1.set_xlabel('Optimization Iterations')
+    ax1.set_ylabel('Loss (MSE)', color=color)
+    ax1.plot(loss_history, color=color, linewidth=2, label="MSE Loss")
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.set_yscale('log')
+    ax1.grid(True, which="both", ls="--", alpha=0.5)
+
+    ax2 = ax1.twinx()
+    color = 'tab:red'
+    ax2.set_ylabel('Quantum Failure Mass [P_fail]', color=color)
+    ax2.plot(prob_history, color=color, linestyle='--', linewidth=2, label="Current P_fail")
+    ax2.axhline(y=TARGET_PROB, color='black', linestyle=':', linewidth=1.5, label='Target Anchor')
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    plt.title("VQIS Classical Inversion Loop Convergence Profile")
+    fig.tight_layout()
+    plt.savefig("figures/vqis_convergence_profile.png", dpi=300)
+    print("[SUCCESS] Convergence tracking schematic saved to 'figures/vqis_convergence_profile.png'")
+
+
+
+    """
+    plt.figure(figsize=(10, 5))
+    plt.plot(range(1, MAX_STEPS + 1), loss_history, marker='o', color='blue', label='Adam Optimizer Loss')
     plt.title("Variational Quantum Parameter Convergence")
     plt.xlabel("Optimization Iteration")
     plt.ylabel("Mean Squared Error Loss")
@@ -94,4 +115,5 @@ if __name__ == "__main__":
     os.makedirs("figures", exist_ok=True)
     plt.savefig("figures/optimization_loss_plot.png", dpi=300, bbox_inches='tight')
     print("Loss convergence plot saved to 'figures/optimization_loss_plot.png'")
+    """
 

@@ -4,14 +4,63 @@ from pennylane import numpy as np
 num_qubits = 10
 dev = qml.device("default.qubit", wires=num_qubits)
 
-@qml.qnode(dev)
-def variational_circuit(params):
+def hamming_failure_mask(num_qubits, k_crit=5.5) -> np.ndarray:
+    """
+    Generates a diagonal failure projector mask based on the abstract Hamming weight boundary, k_crit.
+    States with Hamming weight >= ceil(k_crit) are considered failure states.
+
+    Args:
+        num_qubits: Number of qubits in the register.
+        k_crit: Critical geometric boundary midpoint. Default is 5.5.
+    
+    Returns:
+        A 1D numpy array of size 2^num_qubits acting as a diagonal filter.
+    """
+    num_states = 2**num_qubits
+    failure_mask = np.zeros(num_states, dtype=np.float64)
+    threshold = int(np.ceil(k_crit))
+
+    for idx in range(num_states):
+        hamming_weight = bin(idx).count("1")
+        if hamming_weight >= threshold:
+            failure_mask[idx] = 1.0
+    return failure_mask
+
+def phys_failure_mask(num_qubits, tau=65.0, normal_load=1.0, extreme_load=4.2) -> np.ndarray:
+    """
+    Generates a diagonal failure mask by explicitly evaluating the physical stress equations for every individual basis state config.
+    
+    Args:
+        num_qubits: number of variables/qubits.
+        tau: structural capacity ceiling.
+        normal_load: physical value mapped to bit 0.
+        extreme_load: physical value mapped to bit 1.
+    
+    Returns:
+        A 1D numpy array of size 2^num_qubits representing true micro-physics boundaries.
+    """
+    num_states = 2**num_qubits
+    failure_mask = np.zeroes(num_states, dtype = np.float64)
+
+    for idx in range(num_states):
+        binary_string = f"{idx:0{num_qubits}b}"
+        phys_loads = [extreme_load if bit == '1' else normal_load for bit in binary_string]
+        stress = np.sum(np.array(phys_loads, dtype=np.float64) ** 2)
+
+        if stress > tau:
+            failure_mask[idx] = 1.0
+
+    return failure_mask
+
+def variational_circuit(params, num_qubits, num_layers):
     """
     Constructs a Parameterized Quantum Circuit (PQC) for a 10-qubit system.
-    params: matrix of angles (shape: layers x num_qubits)
-    returns: probabilities of all 2^10 possible state configs
+    Args:
+        params: Flattened or structured array of trainable gate rotation angles
+        num_qubits: Number of wires in device.
+        num_layers: Total depth of the variational ansatz.
     """
-    num_layers = params.shape[0]
+    params = params.reshape((num_layers, num_qubits))
 
     for layer in range(num_layers):
         for qubit in range(num_qubits):
@@ -20,8 +69,8 @@ def variational_circuit(params):
         for qubit in range(num_qubits - 1):
             qml.CNOT(wires=[qubit, qubit + 1])
     
-    return qml.probs(wires=range(num_qubits))
-
+    #return qml.probs(wires=range(num_qubits))
+"""
 if __name__ == "__main__":
     import os
     np.random.seed(42)
@@ -36,3 +85,4 @@ if __name__ == "__main__":
     os.makedirs("quantum_outputs", exist_ok=True)
     np.save("quantum_outputs/initial_quantum_probs.npy", np.array(probs))
     print("Initial quantum probabilities saved to 'quantum_outputs/initial_quantum_probs.npy'")
+"""
