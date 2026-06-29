@@ -4,12 +4,13 @@ import os
 import matplotlib.pyplot as plt
 import quantum_ansatz as ansatz
 
-TARGET_PROB = 0.01420
-if os.path.exists("outputs/ground_truth_baseline.npy"):
-    TARGET_PROB = float(np.load("outputs/ground_truth_baseline.npy"))
+#TARGET_PROB = 0.01420
+#if os.path.exists("outputs/ground_truth_baseline.npy"):
+#    TARGET_PROB = float(np.load("outputs/ground_truth_baseline.npy"))
+TARGET_PROB = 0.10 # NEW: force aggressively oversample
 
 NUM_QUBITS = 10
-NUM_LAYERS = 3
+NUM_LAYERS = 5
 LEARNING_RATE = 0.05
 MAX_STEPS = 150
 SEED = 42
