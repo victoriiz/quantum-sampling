@@ -22,7 +22,7 @@ MAX_STEPS = 150
 SEED = 42
 
 dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
-diagonal_elements = ansatz.hamming_failure_mask(NUM_QUBITS, k_crit=5.5)
+diagonal_elements = ansatz.hamming_failure_mask(NUM_QUBITS, k_crit=3.5)
 failure_operator = qml.Hermitian(np.diag(diagonal_elements), wires=range(NUM_QUBITS))
 
 @qml.qnode(dev, diff_method="adjoint")

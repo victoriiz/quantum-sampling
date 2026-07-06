@@ -4,14 +4,14 @@ from pennylane import numpy as np
 num_qubits = 10
 dev = qml.device("default.qubit", wires=num_qubits)
 
-def hamming_failure_mask(num_qubits, k_crit=5.5) -> np.ndarray:
+def hamming_failure_mask(num_qubits, k_crit=3.5) -> np.ndarray:
     """
     Generates a diagonal failure projector mask based on the abstract Hamming weight boundary, k_crit.
     States with Hamming weight >= ceil(k_crit) are considered failure states.
 
     Args:
         num_qubits: Number of qubits in the register.
-        k_crit: Critical geometric boundary midpoint. Default is 5.5.
+        k_crit: Critical geometric boundary midpoint. Default is 3.5.
     
     Returns:
         A 1D numpy array of size 2^num_qubits acting as a diagonal filter.

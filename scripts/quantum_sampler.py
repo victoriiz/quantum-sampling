@@ -68,14 +68,14 @@ if __name__ == "__main__":
         
         hamming_weight = np.sum(bitstring)
         
-        if hamming_weight >= 6 and q_value > 1e-12:
+        if hamming_weight >= 4 and q_value > 1e-12:
             #phys_coordinates = np.array([EXTREME_LOAD if b == 1 else NORMAL_LOAD for b in bitstring])
             
             #log_p = -np.sum(phys_coordinates)
             #log_q = np.log(q_value)
             
             #is_weights[j] = np.exp(log_p - log_q, dtype=np.float64)
-            p_discrete = GROUND_TRUTH / 386.0
+            p_discrete = GROUND_TRUTH / 848.0
             raw_weight = p_discrete / q_value
             weight = min(raw_weight, 5.0)
             is_weights[j] = weight

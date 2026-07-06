@@ -13,8 +13,6 @@ SAMPLE_BUDGET = 1_000_000
 GROUND_TRUTH = 0.01422
 TOTAL_STATES = 2**NUM_QUBITS  # 1024
 
-#os.makedirs("outputs", exist_ok=True)
-#os.makedirs("figures", exist_ok=True)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "outputs")
 FIGURES_DIR = os.path.join(PROJECT_ROOT, "figures")
@@ -23,8 +21,8 @@ os.makedirs(FIGURES_DIR, exist_ok=True)
 
 BASIS_STATES = np.array([[int(x) for x in format(i, f'0{NUM_QUBITS}b')] for i in range(TOTAL_STATES)])
 HAMMING_WEIGHTS = np.sum(BASIS_STATES, axis=1)
-FAILURE_INDICES = np.where(HAMMING_WEIGHTS >= 6)[0]
-NUM_FAILURE_STATES = len(FAILURE_INDICES)  # Exactly 386
+FAILURE_INDICES = np.where(HAMMING_WEIGHTS >= 4)[0]
+NUM_FAILURE_STATES = len(FAILURE_INDICES)  # Exactly 848
 
 print(f"Loaded Subspace Configuration: {NUM_FAILURE_STATES} failure states out of {TOTAL_STATES} total.")
 
@@ -35,8 +33,8 @@ dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
 
 @qml.qnode(dev, interface="autograd")
 def get_statevector(weights):
-    for i in range(NUM_QUBITS):
-        qml.RY(np.pi / 4, wires=i)
+    #for i in range(NUM_QUBITS):
+        #qml.RY(np.pi / 4, wires=i)
     
     param_idx = 0
     for L in range(NUM_LAYERS):
@@ -45,7 +43,7 @@ def get_statevector(weights):
             param_idx += 1
         for i in range(NUM_QUBITS - 1):
             qml.CNOT(wires=[i, i + 1])
-        qml.CNOT(wires=[NUM_QUBITS - 1, 0])
+        #qml.CNOT(wires=[NUM_QUBITS - 1, 0])
         
     return qml.state()
 
