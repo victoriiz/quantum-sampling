@@ -46,12 +46,10 @@ if __name__ == "__main__":
     print("="*70)
     print("PHASE 4: COHERENT STATEVECTOR SAMPLING")
     print("="*70)
-
-    # 1. Coherent Probability Matrix Extraction
+    
     state_vector = get_exact_statevector(weights)
     q_dist = np.abs(state_vector) ** 2
 
-    # 2. Native Empirical Sampling (Bypasses Wire-Ordering Mismatches)
     np.random.seed(42)
     sample_indices = np.random.choice(range(2**NUM_QUBITS), size=SAMPLE_BUDGET, p=q_dist)
 

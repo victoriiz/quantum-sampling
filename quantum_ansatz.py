@@ -40,7 +40,7 @@ def phys_failure_mask(num_qubits, tau=65.0, normal_load=1.0, extreme_load=4.2) -
         A 1D numpy array of size 2^num_qubits representing true micro-physics boundaries.
     """
     num_states = 2**num_qubits
-    failure_mask = np.zeroes(num_states, dtype = np.float64)
+    failure_mask = np.zeros(num_states, dtype = np.float64)
 
     for idx in range(num_states):
         binary_string = f"{idx:0{num_qubits}b}"
@@ -70,19 +70,33 @@ def variational_circuit(params, num_qubits, num_layers):
             qml.CNOT(wires=[qubit, qubit + 1])
     
     #return qml.probs(wires=range(num_qubits))
-"""
+
 if __name__ == "__main__":
     import os
+
+    PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "outputs")
+
+    num_qubits = 10
+    dev = qml.device("default.qubit", wires=num_qubits)
     np.random.seed(42)
     layers = 3
     initial_weights = np.random.uniform(0, 2 * np.pi, (layers, num_qubits), requires_grad=True)
 
-    probs = variational_circuit(initial_weights)
+    @qml.qnode(dev)
+    def _probe(weights):
+        variational_circuit(weights, num_qubits, layers)
+        return qml.probs(wires=range(num_qubits))
+    
+    probs = _probe(initial_weights)
 
     print(f"Successfully initiated ansatz with {layers} layers and {num_qubits} qubits. There are {initial_weights.size} trainable parameters")
     print(f"Output state space dimension: {len(probs)} distinct quantum amplitudes.")
 
-    os.makedirs("quantum_outputs", exist_ok=True)
-    np.save("quantum_outputs/initial_quantum_probs.npy", np.array(probs))
-    print("Initial quantum probabilities saved to 'quantum_outputs/initial_quantum_probs.npy'")
-"""
+    os.makedirs(OUTPUTS_DIR, exist_ok=True)
+    out_path = os.path.join(OUTPUTS_DIR, "initial_quantum_probs.npy")
+    np.save(out_path, np.array(probs))
+    print(f"Intiail quantum probabilities saved to '{out_path}'")
+    # os.makedirs("quantum_outputs", exist_ok=True)
+    # np.save("quantum_outputs/initial_quantum_probs.npy", np.array(probs))
+    # print("Initial quantum probabilities saved to 'quantum_outputs/initial_quantum_probs.npy'")

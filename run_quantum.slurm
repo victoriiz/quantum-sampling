@@ -13,8 +13,6 @@ module purge
 module load default
 module load python/3.11.9             
 
-# Navigate to your repository script location
 cd /work/nvme/bccu/vz8/quantum-sampling
 
-# Execute using your safe home-hosted python environment binary
 ~/qenv/bin/python quantum_ansatz.py
