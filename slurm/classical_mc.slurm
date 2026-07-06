@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=q_samp # Name of your job
-#SBATCH --account=bccu-dtai-gh      # YOUR EXPLICIT DELTA-AI ACCOUNT FROM QUOTA LOG
+#SBATCH --job-name=q_samp 
+#SBATCH --account=bccu-dtai-gh      
 #SBATCH --partition=ghx4            # Partition type
 #SBATCH --nodes=1                   # Request 1 compute node
 #SBATCH --ntasks-per-node=1         # Run a single program instance

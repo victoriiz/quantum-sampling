@@ -1,0 +1,4 @@
+numpy
+matplotlib
+pennylane
+pennylane-lightning

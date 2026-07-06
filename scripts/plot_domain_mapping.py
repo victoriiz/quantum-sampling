@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FIGURES_DIR = os.path.join(PROJECT_ROOT, "figures")
+
 fig, ax = plt.subplots(figsize=(8, 7), dpi=300)
 ax.grid(True, linestyle=':', alpha=0.6, color='#cbd5e1')
 
@@ -45,9 +48,8 @@ ax.set_ylabel(r'Environmental Load Variable $x_2$', fontsize=12, fontweight='bol
 ax.set_title('VQIS Domain Mapping: Continuous Space vs. Discrete Grid Mesh', fontsize=13, fontweight='bold', pad=15)
 ax.legend(loc='upper right', frameon=True, facecolor='white', edgecolor='#e2e8f0')
 
-# Save high-resolution file
-os.makedirs("figures", exist_ok=True)
-output_path = "figures/cont_vs_discrete_space.png"
+os.makedirs(FIGURES_DIR, exist_ok=True)
+output_path = os.path.join(FIGURES_DIR, "cont_vs_discrete_space.png")
 plt.savefig(output_path, dpi=300, bbox_inches='tight')
 plt.close()
 print(f"Success: Image saved to {output_path}")

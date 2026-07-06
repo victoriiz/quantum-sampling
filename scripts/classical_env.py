@@ -3,6 +3,10 @@ import numpy as np
 import time
 import multiprocessing as mp
 import sys
+import os
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "outputs")
 
 def evaluate_system_failure(seed_and_samples):
     """ Runs a batch of Monte Carlo samples to look for a rare failure. """
@@ -42,4 +46,8 @@ if __name__ == "__main__":
     print(f"True Probability : {true_probability:.8e}")
     print("======================================================")
     
-    np.save("ground_truth_baseline.npy", true_probability)
+    #np.save("ground_truth_baseline.npy", true_probability)
+    os.makedirs(OUTPUTS_DIR, exist_ok=True)
+    out_path = os.path.join(OUTPUTS_DIR, "ground_truth_baseline.npy")
+    np.save(out_path, true_probability)
+    print(f"Saved ground truth baseline to '{out_path}'")

@@ -13,8 +13,13 @@ SAMPLE_BUDGET = 1_000_000
 GROUND_TRUTH = 0.01422
 TOTAL_STATES = 2**NUM_QUBITS  # 1024
 
-os.makedirs("outputs", exist_ok=True)
-os.makedirs("figures", exist_ok=True)
+#os.makedirs("outputs", exist_ok=True)
+#os.makedirs("figures", exist_ok=True)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "outputs")
+FIGURES_DIR = os.path.join(PROJECT_ROOT, "figures")
+os.makedirs(OUTPUTS_DIR, exist_ok=True)
+os.makedirs(FIGURES_DIR, exist_ok=True)
 
 BASIS_STATES = np.array([[int(x) for x in format(i, f'0{NUM_QUBITS}b')] for i in range(TOTAL_STATES)])
 HAMMING_WEIGHTS = np.sum(BASIS_STATES, axis=1)
@@ -45,7 +50,7 @@ def get_statevector(weights):
     return qml.state()
 
 # Load optimized weights from Phase 3
-WEIGHTS_PATH = "outputs/optimized_vqis_weights.npy"
+WEIGHTS_PATH = os.path.join(OUTPUTS_DIR, "optimized_vqis_weights.npy")
 if os.path.exists(WEIGHTS_PATH):
     optimized_weights = np.load(WEIGHTS_PATH)
     print("Successfully loaded optimized VQIS weights.")
@@ -94,17 +99,14 @@ exp2_results = []
 for cap in clipping_thresholds:
     is_weights = np.zeros(SAMPLE_BUDGET, dtype=np.float64)
     
-    # Vectorized calculation over drawn samples
     sample_hamming = HAMMING_WEIGHTS[sampled_indices]
     sample_q = q_probabilities[sampled_indices]
     
-    # Identify failure indices inside the drawn sample budget
-    fail_mask = (sample_hamming >= 6) & (sample_q > 1e-12)
+    fail_mask = (sample_hamming >= 6) & (sample_q > 1e-12) # NOTE: CHECK IF BOUNDARY IS CORRECT
     
     p_discrete = GROUND_TRUTH / float(NUM_FAILURE_STATES)
     raw_weights = p_discrete / sample_q
     
-    # Apply Defensive Clipping
     clipped_weights = np.minimum(raw_weights, cap)
     
     is_weights[fail_mask] = clipped_weights[fail_mask]
@@ -121,7 +123,7 @@ for cap in clipping_thresholds:
     })
     print(f"Threshold: {cap:5.1f} | Est: {est_mean*100:6.4f}% | Var: {vqis_variance:.6f} | VRF: {vrf:.2f}x")
 
-with open("outputs/exp2_clipping_sweep.json", "w") as f:
+with open(os.path.join(OUTPUTS_DIR, "exp2_clipping_sweep.json"), "w") as f:
     json.dump(exp2_results, f, indent=4)
 
 fig, ax1 = plt.subplots(figsize=(9, 5))
@@ -132,7 +134,7 @@ vrfs = [r['vrf'] for r in exp2_results]
 
 ax1.plot(thresholds, estimates, color='tab:blue', marker='o', linewidth=2, label="Unbiased Estimate (%)")
 ax1.axhline(GROUND_TRUTH * 100, color='tab:blue', linestyle='--', alpha=0.7, label="True Ground Truth")
-ax1.set_xlabel("Defensive Weight Clipping Threshold ($C$)")
+ax1.set_xlabel("Truncated Weight Clipping Threshold ($C$)")
 ax1.set_ylabel("VQIS Estimate (%)", color='tab:blue')
 ax1.tick_params(axis='y', labelcolor='tab:blue')
 ax1.set_xscale('log')
@@ -145,7 +147,7 @@ ax2.tick_params(axis='y', labelcolor='tab:orange')
 
 plt.title("The Bias-Variance Tradeoff in Defensive Quantum Importance Sampling")
 fig.tight_layout()
-plt.savefig("figures/exp2_clipping_sweep.png", dpi=300)
+plt.savefig(os.path.join(FIGURES_DIR, "exp2_clipping_sweep.png"), dpi=300)
 plt.close()
 print("Experiment 2 complete. Plot saved to figures/experiment2_clipping_sweep.png")
 
@@ -173,7 +175,7 @@ plt.yscale('log')
 plt.legend()
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig("figures/exp3_squeezing_profiles.png", dpi=300)
+plt.savefig(os.path.join(FIGURES_DIR, "exp3_squeezing_profiles.png"), dpi=300)
 plt.close()
 print("Experiment 3 complete. Figure saved to figures/experiment3_squeezing_profiles.png")
 print("\n======================================================================")

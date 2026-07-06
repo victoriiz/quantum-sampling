@@ -1,8 +1,14 @@
 import pennylane as qml
 from pennylane import numpy as np
 import os
+import sys
 import matplotlib.pyplot as plt
-import quantum_ansatz as ansatz
+import scripts.quantum_ansatz as ansatz
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "outputs")
+FIGURES_DIR = os.path.join(PROJECT_ROOT, "figures")
 
 #TARGET_PROB = 0.01420
 #if os.path.exists("outputs/ground_truth_baseline.npy"):
@@ -77,8 +83,10 @@ if __name__ == "__main__":
             print(f"\n[INFO] Convergence achieved within tolerance at step {step}!")
             break
     
-    np.save("outputs/optimized_vqis_weights.npy", params)
-    np.save("outputs/loss_history.npy", np.array(loss_history))
+    #np.save("outputs/optimized_vqis_weights.npy", params)
+    #np.save("outputs/loss_history.npy", np.array(loss_history))
+    np.save(os.path.join(OUTPUTS_DIR, "optimized_vqis_weights.npy"), params)
+    np.save(os.path.join(OUTPUTS_DIR, "loss_history.npy"), np.array(loss_history))
     print("Optimization complete. Optimized weights and loss history saved to 'outputs/' directory.")
 
     fig, ax1 = plt.subplots(figsize=(10,5))
@@ -100,21 +108,9 @@ if __name__ == "__main__":
 
     plt.title("VQIS Classical Inversion Loop Convergence Profile")
     fig.tight_layout()
-    plt.savefig("figures/vqis_convergence_profile.png", dpi=300)
+    #plt.savefig("figures/vqis_convergence_profile.png", dpi=300)
+    convergence_path = os.path.join(FIGURES_DIR, "vqis_convergence_profile.png")
+    plt.savefig(convergence_path, dpi=300)
     print("[SUCCESS] Convergence tracking schematic saved to 'figures/vqis_convergence_profile.png'")
 
-
-
-    """
-    plt.figure(figsize=(10, 5))
-    plt.plot(range(1, MAX_STEPS + 1), loss_history, marker='o', color='blue', label='Adam Optimizer Loss')
-    plt.title("Variational Quantum Parameter Convergence")
-    plt.xlabel("Optimization Iteration")
-    plt.ylabel("Mean Squared Error Loss")
-    plt.grid(True, alpha=0.2)
-    plt.legend()
-    os.makedirs("figures", exist_ok=True)
-    plt.savefig("figures/optimization_loss_plot.png", dpi=300, bbox_inches='tight')
-    print("Loss convergence plot saved to 'figures/optimization_loss_plot.png'")
-    """
 

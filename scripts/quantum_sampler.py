@@ -2,7 +2,11 @@ import os
 import sys
 import pennylane as qml
 from pennylane import numpy as np
-import quantum_ansatz as ansatz
+import scripts.quantum_ansatz as ansatz
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+OUTPUTS_DIR = os.path.join(PROJECT_ROOT, "outputs")
 
 NUM_QUBITS = 10
 NUM_LAYERS = 5
