@@ -13,11 +13,9 @@ SAMPLE_BUDGET = 1_000_000
 GROUND_TRUTH = 0.01422
 TOTAL_STATES = 2**NUM_QUBITS  # 1024
 
-# Setup directory paths
 os.makedirs("outputs", exist_ok=True)
 os.makedirs("figures", exist_ok=True)
 
-# Generate all 1024 basis states and pre-compute Hamming weights
 BASIS_STATES = np.array([[int(x) for x in format(i, f'0{NUM_QUBITS}b')] for i in range(TOTAL_STATES)])
 HAMMING_WEIGHTS = np.sum(BASIS_STATES, axis=1)
 FAILURE_INDICES = np.where(HAMMING_WEIGHTS >= 6)[0]
@@ -32,11 +30,9 @@ dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
 
 @qml.qnode(dev, interface="autograd")
 def get_statevector(weights):
-    # Layer 0: Initial Superposition Feature Map
     for i in range(NUM_QUBITS):
         qml.RY(np.pi / 4, wires=i)
     
-    # Entangling Layers
     param_idx = 0
     for L in range(NUM_LAYERS):
         for i in range(NUM_QUBITS):
@@ -58,7 +54,6 @@ else:
     np.random.seed(42)
     optimized_weights = np.random.uniform(-np.pi, np.pi, NUM_LAYERS * NUM_QUBITS)
 
-# Compute exact coherent probabilities
 statevector = get_statevector(optimized_weights)
 q_probabilities = np.abs(statevector)**2
 
@@ -126,11 +121,9 @@ for cap in clipping_thresholds:
     })
     print(f"Threshold: {cap:5.1f} | Est: {est_mean*100:6.4f}% | Var: {vqis_variance:.6f} | VRF: {vrf:.2f}x")
 
-# Save JSON results
 with open("outputs/exp2_clipping_sweep.json", "w") as f:
     json.dump(exp2_results, f, indent=4)
 
-# Plotting Experiment 2 Dual Axes
 fig, ax1 = plt.subplots(figsize=(9, 5))
 
 thresholds = [r['threshold'] for r in exp2_results]
@@ -171,7 +164,6 @@ target_profiles = {
 
 plt.figure(figsize=(9, 5))
 for name, profile in target_profiles.items():
-    # Sort descending to view Lorenz / Concentration profile curves clearly
     plt.plot(np.sort(profile)[::-1], label=name, linewidth=2)
 
 plt.title("Structural Deformation Profiling Across Variational Targets")
