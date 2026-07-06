@@ -17,15 +17,15 @@ ax.fill_between(radius * np.cos(theta), radius * np.sin(theta), 12, color='#fee2
 # 2. Plot the Mesh Structure
 ax.plot([1.0, 4.2, 4.2, 1.0, 1.0], [1.0, 1.0, 4.2, 4.2, 1.0], color='#94a3b8', linestyle='--', linewidth=1.5, label='Quantum Grid Mesh')
 
-# 3. Plot Quantum Grid Points Colored by Mask Classification (k_crit = 5.5)
+# 3. Plot Quantum Grid Points Colored by Mask Classification (k_crit = 3.5)
 # Coordinates: (x1, x2, simulated_total_k, color, label)
 quantum_states = [
     (1.0, 1.0, 0, '#16a34a', '(k=0): SAFE'),
     (4.2, 1.0, 1, '#16a34a', '(k=1): SAFE'),
     (1.0, 4.2, 1, '#16a34a', '(k=1): SAFE'),
     (4.2, 4.2, 2, '#16a34a', '(k=2): SAFE'),
-    # Let's plot a point that has 4 hidden background spikes active (Total k = 6)
-    #(4.2, 4.2, 6, '#dc2626', 'Hidden Layer State (k=6): FAILURE')
+    # a point that has 4 hidden background spikes active (Total k = 6)
+    #(4.2, 4.2, 6, '#dc2626', 'Hidden Layer State (k=3.5): FAILURE')
 ]
 
 for x, y, k, color, label in quantum_states:

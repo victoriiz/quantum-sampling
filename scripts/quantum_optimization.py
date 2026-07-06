@@ -3,7 +3,7 @@ from pennylane import numpy as np
 import os
 import sys
 import matplotlib.pyplot as plt
-import scripts.quantum_ansatz as ansatz
+import quantum_ansatz as ansatz
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
