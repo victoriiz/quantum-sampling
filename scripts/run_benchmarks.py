@@ -76,7 +76,7 @@ plt.ylabel("State Count (Log Scale)")
 plt.legend()
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig("figures/exp1_porter_thomas.png", dpi=300)
+plt.savefig(os.path.join(FIGURES_DIR, "exp1_porter_thomas.png"), dpi=300)
 plt.close()
 print("Experiment 1 complete. Figure saved to figures/exp1_porter_thomas.png")
 
@@ -100,7 +100,7 @@ for cap in clipping_thresholds:
     sample_hamming = HAMMING_WEIGHTS[sampled_indices]
     sample_q = q_probabilities[sampled_indices]
     
-    fail_mask = (sample_hamming >= 6) & (sample_q > 1e-12) # NOTE: CHECK IF BOUNDARY IS CORRECT
+    fail_mask = (sample_hamming >= 4) & (sample_q > 1e-12) 
     
     p_discrete = GROUND_TRUTH / float(NUM_FAILURE_STATES)
     raw_weights = p_discrete / sample_q
@@ -167,7 +167,7 @@ for name, profile in target_profiles.items():
     plt.plot(np.sort(profile)[::-1], label=name, linewidth=2)
 
 plt.title("Structural Deformation Profiling Across Variational Targets")
-plt.xlabel("Sorted Failure Subspace States (0 to 386)")
+plt.xlabel("Sorted Failure Subspace States (0 to 848)")
 plt.ylabel("Probability Mass Fraction ($q_i$)")
 plt.yscale('log')
 plt.legend()

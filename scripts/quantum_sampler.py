@@ -16,7 +16,7 @@ EXTREME_LOAD = 4.2
 SAMPLE_BUDGET = 1000000
 GROUND_TRUTH = 0.01422
 
-WEIGHT_PATH = "outputs/optimized_vqis_weights.npy"
+WEIGHT_PATH = os.path.join(OUTPUTS_DIR, "optimized_vqis_weights.npy")
 if not os.path.exists(WEIGHT_PATH):
     raise FileNotFoundError("optimized weights not found.")
 weights = np.load(WEIGHT_PATH)

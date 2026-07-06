@@ -14,4 +14,4 @@ module purge
 module load default
 module load python/3.11.9          
 
-python classical_env.py $SLURM_CPUS_PER_TASK
+python scripts/classical_env.py $SLURM_CPUS_PER_TASK

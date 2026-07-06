@@ -15,4 +15,4 @@ module load python/3.11.9
 
 cd /work/nvme/bccu/vz8/quantum-sampling
 
-~/qenv/bin/python quantum_ansatz.py
+~/qenv/bin/python scripts/quantum_ansatz.py
