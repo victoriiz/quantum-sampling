@@ -129,15 +129,14 @@ if __name__ == "__main__":
     print(f"VQIS Unbiased Est.  : {p_fail_hat * 100:.4f}%")
     print(f"Bias                : {bias * 100:+.4f} percentage points ({bias/GROUND_TRUTH*100:+.1f}% relative)")
     print("-" * 70)
-    print(f"Per-sample weight variance : {is_variance:.6e}   VRF: {vrf:.2f}x")
+    print(f"Per-sample weight variance : {is_variance:.6e}")  
     print(f"Estimator variance (/{SAMPLE_BUDGET:,}) : {estimator_variance:.6e}")
     print(f"MSE (bias^2 + est. variance): {mse:.6e}")
     print(f"Classical MC MSE (unbiased) : {classical_mse:.6e}")
     if mse > 0:
         print(f"MSE ratio vs. classical MC  : {mse / classical_mse:.1f}x {'worse' if mse > classical_mse else 'better'}")
     
-    print(f"VQIS Sample Variance: {is_variance:.6e}")
-    print(f"VRF (Speedup)       : {vrf:.2f}x")
+    print(f"VRF        : {vrf:.2f}x")
     print("="*70)
 
     if hamming_weights_seen.max() >= 4:
