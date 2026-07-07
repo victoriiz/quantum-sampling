@@ -33,9 +33,6 @@ dev = qml.device("lightning.qubit", wires=NUM_QUBITS)
 
 @qml.qnode(dev, interface="autograd")
 def get_statevector(weights):
-    #for i in range(NUM_QUBITS):
-        #qml.RY(np.pi / 4, wires=i)
-    
     param_idx = 0
     for L in range(NUM_LAYERS):
         for i in range(NUM_QUBITS):
@@ -43,7 +40,6 @@ def get_statevector(weights):
             param_idx += 1
         for i in range(NUM_QUBITS - 1):
             qml.CNOT(wires=[i, i + 1])
-        #qml.CNOT(wires=[NUM_QUBITS - 1, 0])
         
     return qml.state()
 
@@ -61,16 +57,16 @@ statevector = get_statevector(optimized_weights)
 q_probabilities = np.abs(statevector)**2
 
 # ----------------------------------------------------------------------
-# EXPERIMENT 1: PORTER-THOMAS PROOF (ANSATZ STARVATION)
+# EXPERIMENT 1: ANSATZ STARVATION
 # ----------------------------------------------------------------------
-print("\nRunning Experiment 1: Porter-Thomas Proof...")
+print("\nRunning Experiment 1: Failure State Distribution...")
 q_failures = q_probabilities[FAILURE_INDICES]
 
 plt.figure(figsize=(8, 5))
 plt.hist(q_failures, bins=40, edgecolor='black', alpha=0.75, log=True)
 plt.axvline(np.mean(q_failures), color='red', linestyle='dashed', linewidth=1.5, label=f'Mean q: {np.mean(q_failures):.2e}')
 plt.axvline(GROUND_TRUTH / NUM_FAILURE_STATES, color='green', linestyle='dotted', linewidth=1.5, label='Uniform Target distribution')
-plt.title("Failure State Probability Distribution (Porter-Thomas Effect)")
+plt.title("Failure State Probability Distribution")
 plt.xlabel("Quantum Probability Mass ($q_i$)")
 plt.ylabel("State Count (Log Scale)")
 plt.legend()
@@ -86,7 +82,6 @@ print("Experiment 1 complete. Figure saved to figures/exp1_porter_thomas.png")
 print("\nRunning Experiment 2: Clipping Tolerance Sweep...")
 clipping_thresholds = [1.0, 2.0, 3.5, 5.0, 7.5, 10.0, 25.0, 50.0, 100.0]
 
-# Pre-draw samples classically from the exact coherent statevector to isolate tracking
 np.random.seed(1337)
 sampled_indices = np.random.choice(TOTAL_STATES, size=SAMPLE_BUDGET, p=q_probabilities)
 
@@ -153,8 +148,6 @@ print("Experiment 2 complete. Plot saved to figures/experiment2_clipping_sweep.p
 # EXPERIMENT 3: TARGET PROBABILITY EMULATION (SQUEEZING VERIFICATION)
 # ----------------------------------------------------------------------
 print("\nRunning Experiment 3: Emulating Distribution Squeezing Profiles...")
-# To demonstrate the math without forcing retraining loops, we emulate different optimization profiles.
-# Flat/Smooth vs Mid-Squeezed vs Heavily Oversqueezed (Porter-Thomas limits).
 
 target_profiles = {
     "Twin Profile (Target=1.42%)": np.ones(NUM_FAILURE_STATES) / NUM_FAILURE_STATES,

@@ -97,6 +97,3 @@ if __name__ == "__main__":
     out_path = os.path.join(OUTPUTS_DIR, "initial_quantum_probs.npy")
     np.save(out_path, np.array(probs))
     print(f"Intiail quantum probabilities saved to '{out_path}'")
-    # os.makedirs("quantum_outputs", exist_ok=True)
-    # np.save("quantum_outputs/initial_quantum_probs.npy", np.array(probs))
-    # print("Initial quantum probabilities saved to 'quantum_outputs/initial_quantum_probs.npy'")

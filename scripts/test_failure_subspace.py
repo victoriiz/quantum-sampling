@@ -45,7 +45,6 @@ if __name__ == "__main__":
         print("=" * 78)
         results = []
         for n_grid in [200_000, 400_000]:
-            # pick T_max/n_grid so c^2 lands exactly on a bin edge
             dt = c2 / round(c2 / (300.0 / n_grid))
             T_max = dt * n_grid
             p_fail_total, p_fail_given_k, mass_check = run(c, T_max, n_grid)
