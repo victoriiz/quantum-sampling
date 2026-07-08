@@ -15,4 +15,3 @@ __pycache__/
 # ignore virtual environment directories
 qenv/
 
-scripts_3
