@@ -64,11 +64,27 @@ def summarize(name, trials_fn):
     vrf = (PF_EXACT * (1 - PF_EXACT)) / per_sample_var \
         if per_sample_var > 0 else float("inf")
     rel_err = (mean - PF_EXACT) / PF_EXACT
+    bias = mean - PF_EXACT
+    estimator_variance = per_sample_var / BUDGET
+    mse = bias ** 2 + estimator_variance
+    classical_mse = (PF_EXACT * (1-PF_EXACT)) / BUDGET
+    mse_ratio = mse / classical_mse if classical_mse > 0 else float('inf')
+
+
     print(f"{name:<28} est = {mean:.4e} +/- {ci:.1e}  "
           f"(exact {PF_EXACT:.4e}, rel.err {rel_err:+.2%})  "
           f"VRF = {vrf:,.1f}x")
+    
+    print(f"{'':<28} bias = {bias:+.3e}  bias^2 = {bias**2:.3e}  "
+          f"est.var = {estimator_variance:.3e}  MSE = {mse:.3e}  "
+          f"MSE vs naive MC = {mse_ratio:.4f}x "
+          f"({'better' if mse_ratio < 1 else 'worse'})")
+    
     return {"name": name, "mean": float(mean), "ci95": float(ci),
-            "per_sample_var": per_sample_var, "vrf": float(vrf)}
+            "per_sample_var": per_sample_var, "vrf": float(vrf),
+            "bias": float(bias), "bias_sq": float(bias ** 2),
+            "estimator_variance": float(estimator_variance),
+            "mse": float(mse), "mse_ratio_vs_naive": float(mse_ratio)}
 
 
 if __name__ == "__main__":
@@ -77,8 +93,8 @@ if __name__ == "__main__":
 
     q_kl = circuit_probs(os.path.join(OUT, "weights_kl.npy"))
     q_old = circuit_probs(os.path.join(OUT, "weights_old_mse.npy"))
-    np.save(os.path.join(OUT, "q_kl.npy"), q_kl)
-    np.save(os.path.join(OUT, "q_old.npy"), q_old)
+    #np.save(os.path.join(OUT, "q_kl.npy"), q_kl)
+    #np.save(os.path.join(OUT, "q_old.npy"), q_old)
 
     def naive_trial(rng, budget=BUDGET):
         # expected failures per trial = budget * 1e-5 ~= 2 -> hopeless
