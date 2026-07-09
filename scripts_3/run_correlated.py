@@ -58,7 +58,7 @@ def train_kl():
 def best_single_tilt():
     """Exact per-sample weight variance of tilt p', minimized by grid.
     var = E_q[w^2] - PF^2 with E_q[w^2] = sum_b p_tgt(b)^2 / q(b)."""
-    grid = np.linspace(0.02, 0.6, 117)
+    grid = np.linspace(0.02, 0.95, 1000)
     best, best_v = None, np.inf
     for pt in grid:
         q = (pt ** HW) * ((1 - pt) ** (N - HW))
