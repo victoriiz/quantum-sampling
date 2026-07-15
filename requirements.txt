@@ -1,4 +1,4 @@
-numpy
-matplotlib
-pennylane
-pennylane-lightning
+pennylane>=0.45
+pennylane-lightning>=0.45
+numpy>=1.26
+matplotlib>=3.8
