@@ -3,7 +3,7 @@
 Rare-event probability estimation using a variational quantum circuit as an
 importance-sampling proposal (VQIS), trained with a classical Adam optimizer.
 Estimators are validated against exact, enumerable ground truth at every
-stage -- nothing about the answer enters the estimator.
+stage.
 
 The project has three generations of models, kept side by side:
 
@@ -73,5 +73,4 @@ outputs/     generated .npy/.json (gitignored; regenerate via scripts)
 
 Every model is small enough to enumerate (<= 2^12 states): p(b) is exact
 and closed-form, ground truth is an exact sum, and every reported estimator
-carries bias, variance, MSE, VRF, and ESS -- because a VRF without a bias
-audit is how v1 fooled us.
+carries bias, variance, MSE, VRF, and ESS.
