@@ -62,6 +62,15 @@ def A_op():
                     2 * np.arcsin(np.sqrt(z)), wires=ANC
                 )
 
+def A_op_adjoint_manual():
+    for b in reversed(range(2 ** N)):
+        z = Z[b]
+        if z > 0:
+            qml.ctrl(qml.RY, control=list(range(N)), control_values=bits_of(b))(
+                -2 * np.arcsin(np.sqrt(z)), wires=ANC)
+    for i in reversed(range(N)):
+        qml.RY(-2 * np.arcsin(np.sqrt(P_TILT)), wires=i)
+
 def S_chi():
     """Phase-flip the good subspace (ancilla = 1)"""
     qml.PauliZ(wires=ANC)
@@ -79,9 +88,10 @@ def G_op():
     """Grover operator G = -A S_0 A^dagger S_chi"""
     S_chi()
     qml.adjoint(A_op)()
+    #A_op_adjoint_manual()
     S_zero()
     A_op()
-    
+
 # ================================================== EXP 1: noiseless circuit
 dev = qml.device("default.qubit", wires=TOT)
  
@@ -117,7 +127,7 @@ def mle_from_circuit(powers, shots, rng):
     return np.sin(GRID[np.argmax(ll)]) ** 2, queries
  
 rng = np.random.default_rng(7)
-REPS, SHOTS = 80, 40
+REPS, SHOTS = 80, 100
 qx, qy = [], []
 for J in range(1, 6):
     powers = [0] + [2 ** j for j in range(J)]
